@@ -1,5 +1,5 @@
 import {MAIN} from '../../data';
-import {flatten, keys, vals} from '../../util';
+import {flatten, keys} from '../../util';
 import {AggregateNode} from './aggregate';
 import {DataFlowNode, OutputNode} from './dataflow';
 import {checkLinks} from './debug';
@@ -159,8 +159,9 @@ export function isTrue(x: boolean) {
 }
 
 function optimizationDataflowHelper(dataComponent: DataComponent) {
-  let roots: SourceNode[] = vals(dataComponent.sources);
+  let roots: SourceNode[] = dataComponent.sources;
   let mutatedFlag = false;
+
   // mutatedFlag should always be on the right side otherwise short circuit logic might cause the mutating method to not execute
   mutatedFlag = roots.map(removeUnnecessaryNodes).some(isTrue) || mutatedFlag;
   // remove source nodes that don't have any children because they also don't have output nodes
@@ -184,12 +185,10 @@ function optimizationDataflowHelper(dataComponent: DataComponent) {
       .some(isTrue) || mutatedFlag;
 
   mutatedFlag = roots.map(mergeParse).some(isTrue) || mutatedFlag;
-  mutatedFlag = roots.map(optimizers.mergeIdenticalNodes).some(isTrue) || mutatedFlag;
-  keys(dataComponent.sources).forEach(s => {
-    if (dataComponent.sources[s].numChildren() === 0) {
-      delete dataComponent.sources[s];
-    }
-  });
+  mutatedFlag = roots.map(optimizers.mergeIdenticalTransforms).some(isTrue) || mutatedFlag;
+
+  dataComponent.sources = roots;
+
   return mutatedFlag;
 }
 
