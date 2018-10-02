@@ -185,7 +185,7 @@ function optimizationDataflowHelper(dataComponent: DataComponent) {
       .some(isTrue) || mutatedFlag;
 
   mutatedFlag = roots.map(mergeParse).some(isTrue) || mutatedFlag;
-  mutatedFlag = roots.map(optimizers.mergeIdenticalTransforms).some(isTrue) || mutatedFlag;
+  mutatedFlag = roots.map(optimizers.mergeIdenticalNodes).some(isTrue) || mutatedFlag;
 
   dataComponent.sources = roots;
 
@@ -197,7 +197,7 @@ function optimizationDataflowHelper(dataComponent: DataComponent) {
  */
 export function optimizeDataflow(data: DataComponent) {
   // check before optimizations
-  checkLinks(vals(data.sources));
+  checkLinks(data.sources);
 
   for (let i = 0; i < 5; i++) {
     if (!optimizationDataflowHelper(data)) {
@@ -206,7 +206,7 @@ export function optimizeDataflow(data: DataComponent) {
   }
 
   // move facets down and make a copy of the subtree so that we can have scales at the top level
-  vals(data.sources).map(moveFacetDown);
+  data.sources.map(moveFacetDown);
 
   for (let i = 0; i < 5; i++) {
     if (!optimizationDataflowHelper(data)) {
@@ -215,5 +215,5 @@ export function optimizeDataflow(data: DataComponent) {
   }
 
   // check after optimizations
-  checkLinks(vals(data.sources));
+  checkLinks(data.sources);
 }
